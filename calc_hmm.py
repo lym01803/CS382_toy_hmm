@@ -24,7 +24,7 @@ def Beta(seq, h2h, h2v):
     N = len(seq)
     H = h2h.shape[0]
     assert (N > 0 and H > 0)
-    beta = [h2v[i][seq[-1]] for i in range(H)]
+    beta = [1.0 for i in range(H)]
     print('----beta----')
     print(beta)
     beta_ = [0 for i in range(H)]
@@ -32,8 +32,7 @@ def Beta(seq, h2h, h2v):
         for h in range(H):
             beta_[h] = 0
             for h_ in range(H):
-                beta_[h] += beta[h_] * h2h[h][h_]
-            beta_[h] *= h2v[h][seq[N - i - 1]]
+                beta_[h] += beta[h_] * h2h[h][h_] * h2v[h_][seq[N - i]]
         beta, beta_ = beta_, beta 
         print(beta)
     return beta
@@ -79,9 +78,10 @@ def calc_sentence(sentence, h0, h2h, h2v):
     alpha = Alpha(seq, h0, h2h, h2v)
     beta = Beta(seq, h2h, h2v)
     h = Viterbi(seq, h0, h2h, h2v)
+    print('Hidden State: {}'.format(h))
     print(''.join([sentence[i] + '/' if (h[i] == 1 and i != len(seq) - 1) else sentence[i] for i in range(len(seq))]))
     print('Forward: {}'.format(sum(alpha)))
-    print('Backward: {}'.format(sum([h0[i] * beta[i] for i in range(h0.shape[0])])))
+    print('Backward: {}'.format(sum([h0[i] * beta[i] * h2v[i][seq[0]] for i in range(h0.shape[0])])))
 
 if __name__ == '__main__':
     path = './hmm_parameters.pkl'
